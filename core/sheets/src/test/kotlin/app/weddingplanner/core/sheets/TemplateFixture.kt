@@ -5,10 +5,24 @@ import app.weddingplanner.core.sheets.layout.Tabs
 /** Builds a minimal copy of the wedding template with the headers and a few rows per table. */
 object TemplateFixture {
     fun create(): FakeSheetsGateway = FakeSheetsGateway().apply {
-        tab(Tabs.DASHBOARD).set(10, 'O', CellValue.Number(46404.0))
-        tab(Tabs.VENDOR).text(5, 'B', "Kategori")
+        tab(Tabs.DASHBOARD).apply {
+            listOf('C' to "📅 Lamaran", 'G' to "📅 Pengajian", 'K' to "💒 Pre Wedding", 'O' to "💒 Wedding")
+                .forEach { (c, t) -> text(9, c, t) }
+            set(10, 'C', CellValue.Number(46312.0))
+            set(10, 'O', CellValue.Number(46404.0))
+        }
+        tab(Tabs.VENDOR).apply {
+            listOf('B' to "Kategori", 'D' to "Nama Vendor", 'F' to "Pembayaran", 'G' to "Pertemuan", 'H' to "Keterangan Lain")
+                .forEach { (c, t) -> text(5, c, t) }
+            text(6, 'B', "Jasa WO"); text(6, 'D', "Vendor A"); text(6, 'F', "DP"); text(6, 'G', "Selesai")
+            text(7, 'B', "Dekorasi")
+        }
 
         tab(Tabs.BUDGET).apply {
+            text(7, 'B', "BUDGETING NIKAH"); set(8, 'B', CellValue.Number(140_000_000.0))
+            text(6, 'K', "Total Biaya"); set(6, 'L', CellValue.Number(129_869_604.0))
+            set(7, 'L', CellValue.Number(28_551_216.0)); set(9, 'L', CellValue.Number(0.22))
+            text(11, 'K', "Item Lunas"); text(11, 'L', "10 dari 38 item"); text(12, 'L', "0 pembayaran")
             listOf('B' to "No", 'C' to "Category", 'D' to "Detail Item", 'E' to "Vendor", 'J' to "Sudah Dibayar", 'N' to "Jatuh Tempo")
                 .forEach { (c, t) -> text(24, c, t) }
             text(77, 'B', "MAHAR & SESERAHAN")

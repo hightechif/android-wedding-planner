@@ -11,8 +11,8 @@ android {
 
     defaultConfig {
         applicationId = "app.weddingplanner"
-        versionCode = 1
-        versionName = "0.1.0-m0"
+        versionCode = 2
+        versionName = "0.2.0-m1"
     }
 
     flavorDimensions += "env"
@@ -41,8 +41,11 @@ dependencies {
     implementation(projects.core.datastore)
     implementation(projects.core.auth)
     implementation(projects.core.sheets)
+    implementation(projects.core.data)
     implementation(projects.feature.onboarding)
     implementation(projects.feature.home)
+    implementation(projects.feature.budget)
+    implementation(projects.feature.vendor)
     "devImplementation"(projects.feature.sheetsetup)
 
     implementation(libs.androidx.core.ktx)
