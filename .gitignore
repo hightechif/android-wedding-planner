@@ -1,0 +1,12 @@
+# Personal wedding data — never commit
+wedding-profile.json
+
+# Gradle / Android
+.gradle/
+.kotlin/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.cxx/
