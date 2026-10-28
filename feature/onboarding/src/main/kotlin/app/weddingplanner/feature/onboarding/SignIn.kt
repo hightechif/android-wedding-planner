@@ -32,7 +32,9 @@ import androidx.lifecycle.viewModelScope
 import app.weddingplanner.core.auth.AuthorizationOutcome
 import app.weddingplanner.core.auth.GoogleAccessTokenProvider
 import app.weddingplanner.core.auth.GoogleAuthRepository
+import app.weddingplanner.core.auth.LocalDataMode
 import app.weddingplanner.core.auth.SignInResult
+import app.weddingplanner.core.datastore.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,13 +54,23 @@ data class SignInUiState(
 class SignInViewModel @Inject constructor(
     private val auth: GoogleAuthRepository,
     private val tokens: GoogleAccessTokenProvider,
+    private val localMode: LocalDataMode,
+    private val preferences: UserPreferencesRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SignInUiState())
     val state: StateFlow<SignInUiState> = _state.asStateFlow()
 
+    val isLocalMode: Boolean get() = localMode.enabled
+
     fun signIn(activityContext: Context) {
         _state.update { SignInUiState(loading = true) }
         viewModelScope.launch {
+            if (localMode.enabled) {
+                // Emulator: no Google account; the local sheet needs no token.
+                preferences.setAccount(LocalDataMode.EMAIL)
+                _state.update { SignInUiState(signedIn = true) }
+                return@launch
+            }
             when (val result = auth.signIn(activityContext)) {
                 is SignInResult.Success -> handle(auth.authorize(result.email))
                 SignInResult.Cancelled -> _state.update { SignInUiState() }
@@ -120,6 +132,14 @@ internal fun SignInScreen(onSignedIn: () -> Unit, viewModel: SignInViewModel = h
             } else {
                 Text("Masuk dengan Google")
             }
+        }
+        if (viewModel.isLocalMode) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "Mode emulator: tanpa login Google, memakai data lokal dari dummy.xlsx.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.tertiary,
+            )
         }
         state.error?.let {
             Spacer(Modifier.height(16.dp))

@@ -1,3 +1,4 @@
+import app.weddingplanner.buildlogic.CopyLocalSheetTask
 import app.weddingplanner.buildlogic.GenerateWeddingProfileTask
 import app.weddingplanner.buildlogic.WeddingProfileJson
 import app.weddingplanner.buildlogic.asLiteral
@@ -12,6 +13,9 @@ import org.gradle.kotlin.dsl.register
  * Reads the couple's `wedding-profile.json` and turns it into build-time defaults:
  * `BuildConfig.DEFAULT_SHEET_ID` / `GOOGLE_WEB_CLIENT_ID` per flavour, and a generated
  * `WeddingProfileDefaults` object. The JSON itself never ships in the APK (TRD §3.5).
+ *
+ * Dev variants also get the emulator's local data: `wp.localSheet` (an .xlsx export of the sheet,
+ * git-ignored) copied into the assets by [CopyLocalSheetTask] and read by the app as-is.
  */
 class WeddingProfileConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -37,6 +41,15 @@ class WeddingProfileConventionPlugin : Plugin<Project> {
                     outputDir.set(layout.buildDirectory.dir("generated/wp-profile/${variant.name}"))
                 }
                 variant.sources.java?.addGeneratedSourceDirectory(task, GenerateWeddingProfileTask::outputDir)
+
+                if (variant.flavorName == "dev") {
+                    val sheetTask = tasks.register<CopyLocalSheetTask>("copy${variant.name.replaceFirstChar { it.uppercase() }}LocalSheet") {
+                        val xlsx = rootProject.file((findProperty("wp.localSheet") as String?) ?: "dummy.xlsx")
+                        if (xlsx.exists()) xlsxFile.set(xlsx)
+                        outputDir.set(layout.buildDirectory.dir("generated/wp-local-sheet/${variant.name}"))
+                    }
+                    variant.sources.assets?.addGeneratedSourceDirectory(sheetTask, CopyLocalSheetTask::outputDir)
+                }
             }
         }
     }

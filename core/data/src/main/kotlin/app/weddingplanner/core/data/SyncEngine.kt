@@ -37,7 +37,8 @@ import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
-enum class SyncTrigger { FOREGROUND, MANUAL, LINKED }
+/** [MANUAL], [LINKED] and [MIGRATED] re-read the sheet's tabs and schema version instead of using the hourly cache. */
+enum class SyncTrigger { FOREGROUND, MANUAL, LINKED, MIGRATED }
 
 /**
  * Read-only sync (M1): pull → validate → reconcile row IDs → replace the cache (TRD §5.4, without
@@ -89,7 +90,7 @@ class SyncEngine @Inject constructor(
         val spreadsheetId = prefs.linkedSpreadsheetId ?: return
         val startedAt = System.currentTimeMillis()
         live.value = live.value.copy(state = SyncState.SYNCING)
-        if (trigger == SyncTrigger.LINKED) metaCheckedAt = 0
+        if (trigger != SyncTrigger.FOREGROUND) metaCheckedAt = 0
 
         val outcome = try {
             pullAndStore(spreadsheetId, prefs.accountEmail)

@@ -30,6 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import app.weddingplanner.core.data.SyncEngine
+import app.weddingplanner.core.data.SyncTrigger
 import app.weddingplanner.core.datastore.UserPreferencesRepository
 import app.weddingplanner.core.designsystem.CheckRow
 import app.weddingplanner.core.designsystem.CheckState
@@ -67,6 +69,7 @@ class SheetSetupViewModel @Inject constructor(
     private val migrator: SheetMigrator,
     private val preferences: UserPreferencesRepository,
     private val profile: WeddingProfile,
+    private val sync: SyncEngine,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SheetSetupUiState())
     val state: StateFlow<SheetSetupUiState> = _state.asStateFlow()
@@ -83,6 +86,8 @@ class SheetSetupViewModel @Inject constructor(
         val plan = requireNotNull(_state.value.plan)
         val report = migrator.apply(plan) { step -> _state.update { it.copy(log = it.log + step) } }
         _state.update { it.copy(report = report, plan = report.verification) }
+        // Pull right away so Beranda shows the data without waiting for the next poll.
+        sync.sync(SyncTrigger.MIGRATED)
     }
 
     private fun launchBusy(block: suspend () -> Unit) {

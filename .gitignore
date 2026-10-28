@@ -10,3 +10,6 @@ local.properties
 *.iml
 captures/
 .cxx/
+
+# Local emulator data: an export of a real sheet (guest names, budget). Never commit.
+dummy.xlsx

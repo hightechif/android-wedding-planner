@@ -45,6 +45,8 @@ Before sign-in works, the sheet owner sets up Google Cloud once (manual; not aut
 4. Make a copy of the sheet (File → Make a copy), put its ID in `spreadsheet.devTestCopyId`, and fill in the `accounts[].email` values.
 5. Rebuild, sign in on the **dev** build, link the test copy, then open **Beranda → Penyiapan Sheet (dev)**: check the plan, run the migration, and confirm "Rumus di luar kolom A tidak berubah ✓". Run it on the real sheet only after that.
 
+**Emulator (local data, no Google).** The dev build on an Android Emulator skips Google: "Masuk dengan Google" signs in as `emulator@local.test`, and the link screen is prefilled with the local sheet. The app then reads `dummy.xlsx` at the project root (Google Sheets → File → Download → Microsoft Excel), which the build copies into the dev assets unchanged. Set another file with `wp.localSheet` in `gradle.properties`. If the export comes from a sheet that hasn't been migrated, run **Penyiapan Sheet (dev)** once on the emulator. Changes made there, such as the migration, are saved in the app's private storage and survive restarts until you replace the xlsx. Formulas aren't recalculated. `dummy.xlsx` is git-ignored because an export of your real sheet contains guest names. The prod build never includes it.
+
 ## Milestone plan
 
 Targets are relative: **K** = kickoff, **W** = wedding day. The concrete dates live in `plan.milestones` in `wedding-profile.json`. The plan assumes about 12 weeks between kickoff and the wedding; stretch the gaps if you have more. Each milestone ends with a two-phone test on the **dev flavour against a test copy of the sheet**. The prod flavour is switched on after M2.
